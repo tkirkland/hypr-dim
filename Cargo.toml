@@ -1,0 +1,33 @@
+[package]
+name = "hypr-dim"
+version = "1.0.1"
+authors = ["Max Verevkin <maxxverrr@gmail.com>", "Tony Kirkland <tkirkland@gmail.com>"]
+edition = "2024"
+description = "Per-display brightness/gamma/temperature D-Bus daemon (dev.hyprdim) for wlroots Wayland; gamma backend for brightness-sync. Derived from wl-gammarelay-rs."
+repository = "https://github.com/tkirkland/hypr-dim"
+license = "GPL-3.0-only"
+keywords = ["redshift", "gammastep", "wayland", "night-mode"]
+
+[dependencies]
+anyhow = "1.0"
+bytemuck = "1.13"
+clap = { version = "4.0", default-features = false, features = ["std", "help", "usage", "derive"] }
+libc = "0.2"
+memmap2 = "0.9"
+rustbus-service = { git = "https://github.com/MaxVerevkin/rustbus-service", rev = "1bd3aef" }
+shmemfdrs2 = "1.0"
+wayrs-client = "1.0"
+wayrs-protocols = { version = "0.14", features = ["wlr-gamma-control-unstable-v1"] }
+
+# [patch.'https://github.com/KillingSpark/rustbus']
+# rustbus = { path = "../rustbus/rustbus" }
+# [patch.'https://github.com/MaxVerevkin/rustbus-service']
+# rustbus-service = { path = "../rustbus-service" }
+# [patch.crates-io]
+# wayrs-client = { path = "../wayrs/wayrs-client" }
+# wayrs-protocols = { path = "../wayrs/wayrs-protocols" }
+
+[profile.release]
+lto = "fat"
+strip = true
+codegen-units = 1
