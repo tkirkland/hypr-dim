@@ -11,9 +11,30 @@ on:
 permissions:
   contents: write
 
+# Force node20-targeted actions (checkout, etc.) onto the node24 runtime so
+# they stop emitting the node20 deprecation warning.
+env:
+  ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node24
+
 jobs:
-  release:
+  # Create the Release first; the upload matrix below attaches assets to it.
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1 \
+            || gh release create "${GITHUB_REF_NAME}" \
+                 --title "${GITHUB_REF_NAME}" \
+                 --generate-notes \
+                 --verify-tag
+
+  upload:
     name: ${{ matrix.target }}
+    needs: create-release
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,8 +48,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # Builds with cross for non-native targets, produces a .tar.gz named
-      # hypr-dim-<tag>-<target>, generates a sha256, and uploads it to the
-      # Release for the pushed tag (creating it if needed; matrix-safe).
+      # hypr-dim-<tag>-<target> plus a sha256, and uploads both to the Release.
       - name: Build and upload
         uses: taiki-e/upload-rust-binary-action@v1
         with:

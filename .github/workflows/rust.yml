@@ -2,6 +2,11 @@ on: [push, pull_request]
 
 name: Rust
 
+# Force node20-targeted actions (checkout, etc.) onto the node24 runtime so
+# they stop emitting the node20 deprecation warning.
+env:
+  ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: node24
+
 jobs:
   check:
     name: Check
