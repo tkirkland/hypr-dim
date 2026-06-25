@@ -35,15 +35,19 @@ jobs:
   upload:
     name: ${{ matrix.target }}
     needs: create-release
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-gnu
-          - aarch64-unknown-linux-musl
+        include:
+          # x86_64 builds on the x86 runner (musl via cross).
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest }
+          # aarch64-gnu builds NATIVELY on an arm64 runner — the cross image's
+          # old glibc lacks memfd_create (needed by shmemfdrs2). musl has it,
+          # so aarch64-musl still cross-compiles fine on x86.
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-latest }
     steps:
       - uses: actions/checkout@v4
 
