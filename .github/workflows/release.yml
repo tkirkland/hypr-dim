@@ -49,7 +49,7 @@ jobs:
           - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
           - { target: aarch64-unknown-linux-musl, os: ubuntu-latest }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       # Builds with cross for non-native targets, produces a .tar.gz named
       # hypr-dim-<tag>-<target> plus a sha256, and uploads both to the Release.
