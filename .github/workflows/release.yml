@@ -40,14 +40,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # `short` drops the redundant "unknown" vendor field from the asset name.
           # x86_64 builds on the x86 runner (musl via cross).
-          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest }
-          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest }
+          - { target: x86_64-unknown-linux-gnu, os: ubuntu-latest, short: x86_64-linux-gnu }
+          - { target: x86_64-unknown-linux-musl, os: ubuntu-latest, short: x86_64-linux-musl }
           # aarch64-gnu builds NATIVELY on an arm64 runner — the cross image's
           # old glibc lacks memfd_create (needed by shmemfdrs2). musl has it,
           # so aarch64-musl still cross-compiles fine on x86.
-          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm }
-          - { target: aarch64-unknown-linux-musl, os: ubuntu-latest }
+          - { target: aarch64-unknown-linux-gnu, os: ubuntu-24.04-arm, short: aarch64-linux-gnu }
+          - { target: aarch64-unknown-linux-musl, os: ubuntu-latest, short: aarch64-linux-musl }
     steps:
       - uses: actions/checkout@v5
 
@@ -58,7 +59,7 @@ jobs:
         with:
           bin: hypr-dim
           target: ${{ matrix.target }}
-          archive: hypr-dim-$tag-$target
+          archive: hypr-dim-$tag-${{ matrix.short }}
           checksum: sha256
           locked: true
           token: ${{ secrets.GITHUB_TOKEN }}
