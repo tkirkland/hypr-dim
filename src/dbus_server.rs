@@ -36,12 +36,9 @@ impl DbusServer {
         // See https://github.com/MaxVerevkin/wl-gammarelay-rs/issues/22
         service.set_error_cb("org.freedesktop.DBus.Error.ServiceUnknown", |_| ());
 
-        let req_name_serial =
-            conn.send
-                .send_message_write_all(&rustbus::standard_messages::request_name(
-                    "dev.hyprdim",
-                    0,
-                ))?;
+        let req_name_serial = conn
+            .send
+            .send_message_write_all(&rustbus::standard_messages::request_name("dev.hyprdim", 0))?;
         let req_name_resp = service.get_reply(&mut conn, req_name_serial, Timeout::Infinite)?;
         if req_name_resp.body.parser().get::<u32>()?
             != rustbus::standard_messages::DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER

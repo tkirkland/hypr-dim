@@ -105,11 +105,11 @@ impl WaylandState {
     pub fn restore_connected(&mut self) {
         let remembered = self.snapshots.clone();
         for output in &mut self.outputs {
-            if let Some(name) = &output.name {
-                if let Some(color) = remembered.get(name) {
-                    output.color = *color;
-                    output.color_changed = true;
-                }
+            if let Some(name) = &output.name
+                && let Some(color) = remembered.get(name)
+            {
+                output.color = *color;
+                output.color_changed = true;
             }
         }
     }
@@ -250,7 +250,9 @@ fn gamma_control_cb(ctx: EventCtx<WaylandState, ZwlrGammaControlV1>) {
                 // overwrite the remembered pre-dim value. Only capture on a real
                 // (not-dimmed) disconnect.
                 if !ctx.state.dimmed {
-                    ctx.state.snapshots.insert(output_name.clone(), output.color);
+                    ctx.state
+                        .snapshots
+                        .insert(output_name.clone(), output.color);
                 }
                 ctx.state.events.push_back(WaylandEvent::RemoveOutput {
                     name: output_name.clone(),
