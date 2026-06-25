@@ -6,7 +6,7 @@
 # gamma correction. The value of γ=0.6 is not based on any theory;
 # adjust it to your liking.
 
-dbus="rs.wl-gammarelay / rs.wl.gammarelay"
+dbus="dev.hyprdim / dev.hyprdim"
 
 if [ "$(busctl --user get-property $dbus Inverted)" = "b false" ]; then
     busctl --user set-property $dbus Inverted b true
