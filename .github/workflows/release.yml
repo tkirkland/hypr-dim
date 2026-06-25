@@ -1,0 +1,45 @@
+name: Release
+
+# Build the release binary and attach it to a GitHub Release whenever a
+# version tag (vX.Y.Z) is pushed.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  linux-x86_64:
+    name: Linux x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --release --locked
+
+      - name: Package
+        run: |
+          install -Dm755 target/release/hypr-dim "dist/hypr-dim"
+          tar -C dist -czf "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz" hypr-dim
+          sha256sum "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz" > "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz.sha256"
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes \
+            --verify-tag \
+            hypr-dim-*-x86_64-linux.tar.gz \
+            hypr-dim-*-x86_64-linux.tar.gz.sha256 \
+          || gh release upload "${GITHUB_REF_NAME}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --clobber \
+            hypr-dim-*-x86_64-linux.tar.gz \
+            hypr-dim-*-x86_64-linux.tar.gz.sha256
