@@ -1,7 +1,8 @@
 name: Release
 
-# Build the release binary and attach it to a GitHub Release whenever a
-# version tag (vX.Y.Z) is pushed.
+# Build release binaries and attach them to a GitHub Release whenever a
+# version tag (vX.Y.Z) is pushed. Linux only — hypr-dim is a Wayland/D-Bus
+# daemon and does not build for Windows or macOS.
 on:
   push:
     tags:
@@ -11,35 +12,29 @@ permissions:
   contents: write
 
 jobs:
-  linux-x86_64:
-    name: Linux x86_64
+  release:
+    name: ${{ matrix.target }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
 
-      - name: Build
-        run: cargo build --release --locked
-
-      - name: Package
-        run: |
-          install -Dm755 target/release/hypr-dim "dist/hypr-dim"
-          tar -C dist -czf "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz" hypr-dim
-          sha256sum "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz" > "hypr-dim-${GITHUB_REF_NAME}-x86_64-linux.tar.gz.sha256"
-
-      - name: Publish release
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --title "${GITHUB_REF_NAME}" \
-            --generate-notes \
-            --verify-tag \
-            hypr-dim-*-x86_64-linux.tar.gz \
-            hypr-dim-*-x86_64-linux.tar.gz.sha256 \
-          || gh release upload "${GITHUB_REF_NAME}" \
-            --repo "${GITHUB_REPOSITORY}" \
-            --clobber \
-            hypr-dim-*-x86_64-linux.tar.gz \
-            hypr-dim-*-x86_64-linux.tar.gz.sha256
+      # Builds with cross for non-native targets, produces a .tar.gz named
+      # hypr-dim-<tag>-<target>, generates a sha256, and uploads it to the
+      # Release for the pushed tag (creating it if needed; matrix-safe).
+      - name: Build and upload
+        uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: hypr-dim
+          target: ${{ matrix.target }}
+          archive: hypr-dim-$tag-$target
+          checksum: sha256
+          locked: true
+          token: ${{ secrets.GITHUB_TOKEN }}
