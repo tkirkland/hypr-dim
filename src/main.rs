@@ -66,7 +66,7 @@ fn main() -> anyhow::Result<()> {
             }
         }
         None => match command {
-            Command::Run => eprintln!("hypr-dim is already running"),
+            Command::Run => eprintln!("hyprdim is already running"),
             Command::Watch { format } => {
                 let mut dbus_client = dbus_client::DbusClient::new(format, true)?;
                 dbus_client.run(true)?;
