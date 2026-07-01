@@ -1,6 +1,6 @@
 [package]
 name = "hyprdim"
-version = "0.90.0"
+version = "0.90.1"
 authors = ["Max Verevkin <maxxverrr@gmail.com>", "Tony Kirkland <tkirkland@gmail.com>"]
 edition = "2024"
 description = "Per-display brightness/gamma/temperature D-Bus daemon (dev.hyprdim) for wlroots Wayland; gamma backend for brightness-sync. Derived from wl-gammarelay-rs."
